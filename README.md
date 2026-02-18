@@ -181,7 +181,7 @@ Creates a new Icon component instance.
 
 - `name` (required): The icon name in kebab-case (e.g., `"arrow-down-circle"`)
 - `variant` (optional): Icon variant, either `"outline"` or `"solid"` (default: `"outline"`)
-- `size` (optional): Icon size, either `"16"`, `"20"`, or `"24"` (default: `"24"` for outline, `"20"` for solid)
+- `size` (optional): Icon size, either `"16"`, `"20"`, or `"24"` (default: `"24"`)
 - `**html_options` (optional): Additional HTML attributes to merge into the SVG element
 
 #### Examples
