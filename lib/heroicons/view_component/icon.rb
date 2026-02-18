@@ -31,12 +31,7 @@ module Heroicons
       def svg_content
         @svg_content ||= begin
           raw_svg = IconCache.get(size: size, variant: variant, name: name) || ""
-
-          if raw_svg.empty?
-            ""
-          else
-            merge_html_attributes(raw_svg)
-          end
+          raw_svg.empty? ? "" : merge_html_attributes(raw_svg)
         end
       end
 
@@ -48,54 +43,61 @@ module Heroicons
         svg_tag_match = svg_string.match(/<svg([^>]*)>/)
         return svg_string unless svg_tag_match
 
-        existing_attrs = svg_tag_match[1]
-        new_attrs = []
+        # Parse existing attributes from SVG string into a hash
+        existing_attrs_hash = parse_svg_attributes(svg_tag_match[1])
 
-        # Handle class attribute - merge with existing classes
-        if html_options[:class]
-          class_match = existing_attrs.match(/class=["']([^"']*)["']/)
-          existing_classes = class_match ? class_match[1].strip : ""
-          new_classes = normalize_class(html_options[:class])
+        # Merge user-provided options with existing attributes
+        merged_attrs = merge_attributes(existing_attrs_hash, html_options)
 
-          # Remove existing class attribute from string
-          existing_attrs = existing_attrs.gsub(/class=["'][^"']*["']/, "").strip
+        # Reconstruct SVG tag from merged attributes hash
+        new_svg_tag = build_svg_tag(merged_attrs)
+        svg_string.sub(/<svg[^>]*>/, new_svg_tag)
+      end
 
-          # Combine classes
-          combined_classes = [existing_classes, new_classes].reject(&:empty?).join(" ")
-          new_attrs << %(class="#{combined_classes}") unless combined_classes.empty?
+      def parse_svg_attributes(attrs_string)
+        return {} if attrs_string.nil? || attrs_string.strip.empty?
+
+        attrs_hash = {}
+        # Match attribute="value" or attribute='value' patterns
+        # Handles attributes with colons (like xmlns), hyphens, and underscores
+        attrs_string.scan(/([\w\-:]+)=["']([^"']*)["']/) do |key, value|
+          attrs_hash[key] = value
         end
+        attrs_hash
+      end
 
-        # Add other HTML attributes
-        html_options.except(:class).each do |key, value|
+      def merge_attributes(existing, new_options)
+        merged = existing.dup
+
+        new_options.each do |key, value|
           attr_name = key.to_s.tr("_", "-")
 
           if value.is_a?(Hash)
             # Handle nested attributes like data: { controller: "icon" }
             value.each do |nested_key, nested_value|
               nested_attr = nested_key.to_s.tr("_", "-")
-              new_attrs << %(#{attr_name}-#{nested_attr}="#{escape_html(nested_value)}")
+              merged["#{attr_name}-#{nested_attr}"] = nested_value.to_s
             end
           else
-            new_attrs << %(#{attr_name}="#{escape_html(value)}")
+            # Override existing attribute with new value
+            merged[attr_name] = normalize_attribute(value)
           end
         end
 
-        # Reconstruct SVG tag
-        all_attrs = [existing_attrs, *new_attrs].reject(&:empty?).join(" ")
-        new_svg_tag = "<svg #{all_attrs}>"
-
-        svg_string.sub(/<svg[^>]*>/, new_svg_tag)
+        merged
       end
 
-      def normalize_class(class_value)
-        case class_value
-        when Array
-          class_value.join(" ")
-        when String
-          class_value
-        else
-          class_value.to_s
-        end
+      def build_svg_tag(attrs_hash)
+        attrs_string = attrs_hash.map do |key, value|
+          %(#{key}="#{escape_html(value)}")
+        end.join(" ")
+
+        "<svg #{attrs_string}>"
+      end
+
+      def normalize_attribute(attr_value)
+        attr_value = attr_value.join(" ") if attr_value.is_a?(Array)
+        attr_value.to_s
       end
 
       def escape_html(value)
