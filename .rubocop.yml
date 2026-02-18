@@ -1,0 +1,5 @@
+inherit_gem:
+  rubocop-kobus: rubocop.yml
+
+plugins:
+  - rubocop-minitest
