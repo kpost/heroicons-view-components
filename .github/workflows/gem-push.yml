@@ -4,11 +4,11 @@ on:
   push:
     branches: [ "main" ]
     paths:
-      - lib/rubocop_kobus/version.rb # Only run when version changes
+      - lib/heroicons/view_component/version.rb # Only run when version changes
   pull_request:
     branches: [ "main" ]
     paths:
-      - lib/rubocop_kobus/version.rb # Only run when version changes
+      - lib/heroicons/view_component/version.rb # Only run when version changes
 
 jobs:
   build:
