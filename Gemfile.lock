@@ -124,7 +124,7 @@ GEM
       rubocop-performance (~> 1.18)
       rubocop-rspec (>= 2.23, < 4.0)
       rubocop-shopify (~> 2.14)
-    rubocop-minitest (0.38.2)
+    rubocop-minitest (0.39.1)
       lint_roller (~> 1.1)
       rubocop (>= 1.75.0, < 2.0)
       rubocop-ast (>= 1.38.0, < 2.0)
